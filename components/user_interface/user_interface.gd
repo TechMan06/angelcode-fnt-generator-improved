@@ -20,7 +20,10 @@ var current_char_index: int = 0
 
 var texture_file_extension: String = ""
 
-onready var open_file_dialog = $"TextureInfoControl/OpenFile"
+var fnt_file_array: PoolStringArray = []
+
+onready var open_image_dialog = $"TextureInfoControl/OpenImage"
+onready var open_fnt_dialog = $"TextureInfoControl/OpenFnt"
 
 onready var current_char_rect = $"LetterControl/Items/Panel/Controls/Texture/Panel/Char"
 onready var current_char_advance = $"LetterControl/Items/Panel/Controls/Texture/Panel/Advance"
@@ -34,6 +37,7 @@ onready var current_char_edit = $"LetterControl/Items/Panel/Controls/LetterSwitc
 onready var char_count_label = $"LetterControl/Items/Panel/Controls/LetterSwitch/Centering/Controls/CharCount"
 
 onready var image_load_button = $"TextureInfoControl/Panel/Margin/Scroll/Items/ImageLoad"
+onready var fnt_load_button = $"TextureInfoControl/Panel/Margin/Scroll/Items/FntLoad"
 onready var font_name_edit = $"TextureInfoControl/Panel/Margin/Scroll/Items/FontNameEdit"
 onready var texture_name_edit = $"TextureInfoControl/Panel/Margin/Scroll/Items/TextureNameEdit"
 onready var char_width_edit = $"TextureInfoControl/Panel/Margin/Scroll/Items/CharacterDimensions/CharacterWidthEdit"
@@ -48,10 +52,13 @@ onready var export_as_xml_button = $"TextureInfoControl/Panel/Margin/Scroll/Item
 onready var info_dialog = $"InfoDialog"
 onready var overwrite_dialog = $"FntOverwriteConfirmation"
 
+
 func _ready() -> void:
-	open_file_dialog.connect("file_selected", self, "_on_file_selected")
+	open_image_dialog.connect("file_selected", self, "_on_image_file_selected")
+	open_fnt_dialog.connect("file_selected", self, "_on_fnt_file_selected")
 	
 	image_load_button.connect("pressed", self, "_on_image_load_button_pressed")
+	fnt_load_button.connect("pressed", self, "_on_fnt_load_button_pressed")
 	char_width_edit.connect("focus_exited", self, "_on_char_width_edit_focus_exited")
 	char_height_edit.connect("focus_exited", self, "_on_char_height_edit_focus_exited")
 	
@@ -82,7 +89,6 @@ func _ready() -> void:
 	
 	for i in range(MAX_ADVANCE_INFO_COUNT):
 		advance_infos.push_back(0)
-
 
 func open_overwrite_confirm_dialog():
 	overwrite_dialog.popup_centered()
@@ -135,7 +141,7 @@ func _unlock_edit_buttons(value: bool) -> void:
 	export_button.disabled = !value
 
 
-func _on_file_selected(file_path: String) -> void:
+func _on_image_file_selected(file_path: String) -> void:
 	var image = Image.new()
 	var tex = null
 	var err = image.load(file_path)
@@ -181,7 +187,47 @@ func _on_file_selected(file_path: String) -> void:
 	else:
 		open_dialog(tr("FILE_IS_NOT_TEXTURE"))
 
+func _on_fnt_file_selected(file_path: String) -> void:
+	
+	var fnt_file = File.new()
+	fnt_file.open(file_path, File.READ)
+	fnt_file_array = fnt_file.get_as_text().split("\n")
+	fnt_file.close()
+	
+	var image_file = file_path.replace(file_path.substr(file_path.find_last('/'), file_path.length()-1), '/' + fnt_file_array[2].substr(fnt_file_array[2].find('"') + 1 , fnt_file_array[2].length())).trim_suffix('"')
+	_on_image_file_selected(image_file)
+	print(image_file)
+	#_on_image_file_selected(fnt_file_array[2].substr(fnt_file_array[2].find('"'),fnt_file_array[2].find_last('"',)))
+	#char_height_edit.text = fnt_file_array[0].substr(fnt_file_array[0].find("size="), fnt_file_array[0].find(" ", fnt_file_array[0].find("size=")) - fnt_file_array[0].find("size=")).trim_prefix("size=")
+	
+	char_height_edit.text = get_variable("size")
+	_on_char_height_edit_focus_exited()
+	
+	base_value_edit.text = get_variable("base", 1)
+	_on_base_value_edit_focus_exited()
+	
+	var character_count: int = 0
+	
+	for character_line in fnt_file_array:
+		
+		if character_line.substr(0, 8) == "char id=":
 
+			if character_count == 1:
+				char_width_edit.text = get_variable("x",fnt_file_array.find(character_line))
+				_on_char_width_edit_focus_exited()
+			
+			advance_infos[character_count] = float(get_variable("width", fnt_file_array.find(character_line)))
+			_update_current_visible_char()
+			emit_signal("form_field_updated", {
+				"current_char_advance": advance_infos[current_char_index],
+			})
+			character_count += 1
+
+
+func get_variable(prefix: String = "", line:int = 0):
+	return fnt_file_array[line].substr(fnt_file_array[line].find(prefix+"="), fnt_file_array[line].find(" ", fnt_file_array[line].find(prefix+"=")) - fnt_file_array[line].find(prefix+"=")).trim_prefix(prefix+"=")
+
+	
 func _update_current_visible_char():
 	current_char_atlas.region = Rect2(
 		(int(current_char_index % int(char_counts.x))) * int(char_width_edit.text),
@@ -203,7 +249,13 @@ func _update_current_visible_char():
 
 
 func _on_image_load_button_pressed() -> void:
-	open_file_dialog.popup_centered_ratio()
+	if !open_fnt_dialog.visible:
+		open_image_dialog.popup_centered_ratio()
+	
+	
+func _on_fnt_load_button_pressed() -> void:
+	if !open_image_dialog.visible:
+		open_fnt_dialog.popup_centered_ratio()
 
 
 func _on_char_advance_edit_focus_exited() -> void:
