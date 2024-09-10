@@ -2,6 +2,8 @@ extends Sprite
 
 
 const CHAR_SEPARATOR_COLOR: Color = Color(0, 1.0, 0, 0.5)
+const CHAR_SEPARATOR_COLOR_GRAY: Color = Color(0, 1.0, 0, 0.125)
+const CHAR_YOFFSET_COLOR: Color = Color(0, 0, 1.0, 0.75)
 const CHAR_BASE_COLOR: Color = Color(1.0, 0, 0, 0.5)
 const LETTER_SELECTION_COLOR: Color = Color(1.0, 1.0, 1.0, 0.5)
 
@@ -19,6 +21,7 @@ var is_mouse_pressed: bool = false
 var char_counts: Vector2 = Vector2(1, 1)
 var letter_indices: Vector2 = Vector2(0, 0)
 var char_dimensions: Vector2 = Vector2(1, 1)
+var y_offset: int = 0
 
 var current_char_advance: int = 0
 
@@ -62,6 +65,14 @@ func _draw() -> void:
 	_draw_letter_selection()
 	_draw_letter_separators()
 	_draw_base_line()
+	
+	for i in range(char_counts.y + 1):
+		if i % 2 == 0:
+			draw_line(
+				Vector2(draw_from.x, draw_from.y + (char_dimensions.y * i) + y_offset),
+				Vector2(draw_from.x + texture_dimensions.x, draw_from.y + (char_dimensions.y * i) + y_offset),
+				CHAR_YOFFSET_COLOR
+			)
 
 
 func _draw_letter_selection():
@@ -89,19 +100,20 @@ func _draw_base_line():
 
 
 func _draw_letter_separators():
-	for i in range(char_counts.x + 1):
-		draw_line(
-			Vector2(draw_from.x + (char_dimensions.x * i), draw_from.y),
-			Vector2(draw_from.x + (char_dimensions.x * i), draw_from.y + texture_dimensions.y),
-			CHAR_SEPARATOR_COLOR
-		)
-		
 	for i in range(char_counts.y + 1):
 		draw_line(
 			Vector2(draw_from.x, draw_from.y + (char_dimensions.y * i)),
 			Vector2(draw_from.x + texture_dimensions.x, draw_from.y + (char_dimensions.y * i)),
+			CHAR_SEPARATOR_COLOR_GRAY
+		)
+	
+	for i in range(char_counts.x + 1):
+		draw_line(
+			Vector2(draw_from.x + (char_dimensions.x * i), draw_from.y  + y_offset),
+			Vector2(draw_from.x + (char_dimensions.x * i), draw_from.y + texture_dimensions.y),
 			CHAR_SEPARATOR_COLOR
 		)
+
 
 
 func set_current_char_advance(value: int) -> void:
@@ -126,6 +138,10 @@ func set_wireframe(options: Dictionary) -> void:
 		
 	if options.has("base_from_top") and int(options["base_from_top"]) != base_offset:
 		base_offset = options.base_from_top
+		update()
+		
+	if options.has("y_offset") and int(options["y_offset"]) != y_offset:
+		y_offset = options.y_offset
 		update()
 
 

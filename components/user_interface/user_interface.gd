@@ -17,6 +17,7 @@ var char_counts: Vector2 = Vector2(1, 1)
 
 var advance_infos: Array = []
 var current_char_index: int = 0
+var offset_y: int = 0
 
 var texture_file_extension: String = ""
 
@@ -45,6 +46,10 @@ onready var char_height_edit = $"TextureInfoControl/Panel/Margin/Scroll/Items/Ch
 onready var decrease_base_button = $"TextureInfoControl/Panel/Margin/Scroll/Items/BaseSettings/DecreaseButton"
 onready var increase_base_button = $"TextureInfoControl/Panel/Margin/Scroll/Items/BaseSettings/IncreaseButton"
 onready var base_value_edit = $"TextureInfoControl/Panel/Margin/Scroll/Items/BaseSettings/BaseValue"
+onready var yoffset_value_edit = $"TextureInfoControl/Panel/Margin/Scroll/Items/YOffsetSettings/BaseValue"
+onready var decrease_yoffset_button = $"TextureInfoControl/Panel/Margin/Scroll/Items/YOffsetSettings/DecreaseButton"
+onready var increase_yoffset_button = $"TextureInfoControl/Panel/Margin/Scroll/Items/YOffsetSettings/IncreaseButton"
+onready var base_yoffset_edit = $"TextureInfoControl/Panel/Margin/Scroll/Items/BaseSettings/BaseValue"
 onready var char_list_edit = $"TextureInfoControl/Panel/Margin/Scroll/Items/CharacterListEdit"
 onready var export_button = $"TextureInfoControl/Panel/Margin/Scroll/Items/ExportButton"
 onready var export_as_xml_button = $"TextureInfoControl/Panel/Margin/Scroll/Items/ExportAsXMLButton"
@@ -68,6 +73,9 @@ func _ready() -> void:
 	decrease_base_button.connect("pressed", self, "_on_decrease_base_button_pressed")
 	increase_base_button.connect("pressed", self, "_on_increase_base_button_pressed")
 	base_value_edit.connect("focus_exited", self, "_on_base_value_edit_focus_exited")
+	decrease_yoffset_button.connect("pressed", self, "_on_decrease_yoffset_button_pressed")
+	increase_yoffset_button.connect("pressed", self, "_on_increase_yoffset_button_pressed")
+	yoffset_value_edit.connect("focus_exited", self, "_on_yoffset_value_edit_focus_exited")
 	export_button.connect("pressed", self, "_on_export_button_pressed")
 	export_as_xml_button.connect("pressed", self, "_on_export_as_xml_button_pressed")
 	
@@ -128,9 +136,12 @@ func _unlock_edit_buttons(value: bool) -> void:
 	char_height_edit.editable = value
 	decrease_base_button.disabled = !value
 	increase_base_button.disabled = !value
+	decrease_yoffset_button.disabled = !value
+	increase_yoffset_button.disabled = !value
 	decrease_advance_button.disabled = !value
 	increase_advance_button.disabled = !value
 	base_value_edit.editable = value
+	yoffset_value_edit.editable = value
 	export_button.disabled = !value
 	current_advance_edit.editable = value
 	prev_char_button.disabled = !value
@@ -187,41 +198,64 @@ func _on_image_file_selected(file_path: String) -> void:
 	else:
 		open_dialog(tr("FILE_IS_NOT_TEXTURE"))
 
+
+func integer_to_hex(integer: int = 0) -> String:
+	var digits: String = "0123456789ABCDEF"
+	var hex_string: String = ""
+	
+	while integer > 0:
+		var digit: int = integer % 16
+		hex_string.insert(0, digits[digits.find(str(digit))])
+		integer = integer / 16
+	
+	return hex_string;
+
+
 func _on_fnt_file_selected(file_path: String) -> void:
 	
-	var fnt_file = File.new()
-	fnt_file.open(file_path, File.READ)
-	fnt_file_array = fnt_file.get_as_text().split("\n")
-	fnt_file.close()
-	
-	var image_file = file_path.replace(file_path.substr(file_path.find_last('/'), file_path.length()-1), '/' + fnt_file_array[2].substr(fnt_file_array[2].find('"') + 1 , fnt_file_array[2].length())).trim_suffix('"')
-	_on_image_file_selected(image_file)
-	print(image_file)
-	#_on_image_file_selected(fnt_file_array[2].substr(fnt_file_array[2].find('"'),fnt_file_array[2].find_last('"',)))
-	#char_height_edit.text = fnt_file_array[0].substr(fnt_file_array[0].find("size="), fnt_file_array[0].find(" ", fnt_file_array[0].find("size=")) - fnt_file_array[0].find("size=")).trim_prefix("size=")
-	
-	char_height_edit.text = get_variable("size")
-	_on_char_height_edit_focus_exited()
-	
-	base_value_edit.text = get_variable("base", 1)
-	_on_base_value_edit_focus_exited()
-	
-	var character_count: int = 0
-	
-	for character_line in fnt_file_array:
+	if file_path.find(".fnt")!=-1:
+		var fnt_file = File.new()
+		fnt_file.open(file_path, File.READ)
+		fnt_file_array = fnt_file.get_as_text().split("\n")
+		fnt_file.close()
 		
-		if character_line.substr(0, 8) == "char id=":
-
-			if character_count == 1:
-				char_width_edit.text = get_variable("x",fnt_file_array.find(character_line))
-				_on_char_width_edit_focus_exited()
+		var image_file = file_path.replace(file_path.substr(file_path.find_last('/'), file_path.length()-1), '/' + fnt_file_array[2].substr(fnt_file_array[2].find('"') + 1 , fnt_file_array[2].length())).trim_suffix('"')
+		_on_image_file_selected(image_file)
+		print(image_file)
+		#_on_image_file_selected(fnt_file_array[2].substr(fnt_file_array[2].find('"'),fnt_file_array[2].find_last('"',)))
+		#char_height_edit.text = fnt_file_array[0].substr(fnt_file_array[0].find("size="), fnt_file_array[0].find(" ", fnt_file_array[0].find("size=")) - fnt_file_array[0].find("size=")).trim_prefix("size=")
+		
+		char_height_edit.text = get_variable("size")
+		_on_char_height_edit_focus_exited()
+		
+		base_value_edit.text = get_variable("base", 1)
+		_on_base_value_edit_focus_exited()
+		
+		var character_count: int = 0
+		
+		for character_line in fnt_file_array:
 			
-			advance_infos[character_count] = float(get_variable("width", fnt_file_array.find(character_line)))
-			_update_current_visible_char()
-			emit_signal("form_field_updated", {
-				"current_char_advance": advance_infos[current_char_index],
-			})
-			character_count += 1
+			if character_line.substr(0, 8) == "char id=":
+
+				if character_count == 1:
+					char_width_edit.text = get_variable("x",fnt_file_array.find(character_line))
+					_on_char_width_edit_focus_exited()
+				
+				advance_infos[character_count] = float(get_variable("width", fnt_file_array.find(character_line)))
+				_update_current_visible_char()
+				emit_signal("form_field_updated", {
+					"current_char_advance": advance_infos[current_char_index],
+				})
+				
+				character_count += 1
+	else:
+		open_dialog(tr("FILE_IS_NOT_FNT"))
+		
+
+
+func get_unicode(char_id: int = 0) -> void:
+	var char_string: String = ""
+	#char_string = char_string.integer_to_hex()
 
 
 func get_variable(prefix: String = "", line:int = 0):
@@ -231,9 +265,9 @@ func get_variable(prefix: String = "", line:int = 0):
 func _update_current_visible_char():
 	current_char_atlas.region = Rect2(
 		(int(current_char_index % int(char_counts.x))) * int(char_width_edit.text),
-		(int(current_char_index / char_counts.x)) * int(char_height_edit.text),
+		(int(current_char_index / char_counts.x)) * int(char_height_edit.text) + int(yoffset_value_edit.text),
 		int(char_width_edit.text),
-		int(char_height_edit.text)
+		int(char_height_edit.text) - int(yoffset_value_edit.text)
 	)
 	
 	var selected_index = min(current_char_index, advance_infos.size() - 1)
@@ -298,6 +332,7 @@ func _on_char_width_edit_focus_exited() -> void:
 	
 	emit_signal("form_field_updated", {
 		"char_width": char_width,
+		"y_offset": int(yoffset_value_edit.text)
 	})
 
 
@@ -314,11 +349,12 @@ func _on_char_height_edit_focus_exited() -> void:
 	
 	emit_signal("form_field_updated", {
 		"char_height": char_height,
+		"y_offset": int(yoffset_value_edit.text)
 	})
 
 
 func _on_decrease_base_button_pressed() -> void:
-	base_value_edit.text = str(max(0, int(base_value_edit.text) - 1))
+	base_value_edit.text = str(int(base_value_edit.text) - 1)
 	emit_signal("form_field_updated", {"base_from_top": int(base_value_edit.text)})
 
 
@@ -326,6 +362,22 @@ func _on_increase_base_button_pressed() -> void:
 	base_value_edit.text = str(min(int(base_value_edit.text) + 1, int(char_height_edit.text)))
 	emit_signal("form_field_updated", {"base_from_top": int(base_value_edit.text)})
 
+
+func _on_decrease_yoffset_button_pressed() -> void:
+	yoffset_value_edit.text = str(max(0, int(yoffset_value_edit.text) - 1))
+	
+	emit_signal("form_field_updated", {"y_offset": int(yoffset_value_edit.text)})
+	
+	_update_current_visible_char()
+
+
+func _on_increase_yoffset_button_pressed() -> void:
+	yoffset_value_edit.text = str(min(int(yoffset_value_edit.text) + 1, int(char_height_edit.text)))
+	
+	emit_signal("form_field_updated", {"y_offset": int(yoffset_value_edit.text)})
+	
+	_update_current_visible_char()
+	
 
 func _on_increase_advance_button_pressed() -> void:
 	advance_infos[current_char_index] = min(
@@ -337,6 +389,7 @@ func _on_increase_advance_button_pressed() -> void:
 	
 	emit_signal("form_field_updated", {
 		"current_char_advance": advance_infos[current_char_index],
+		"y_offset": int(yoffset_value_edit.text)
 	})
 
 
@@ -350,6 +403,7 @@ func _on_decrease_advance_button_pressed() -> void:
 	
 	emit_signal("form_field_updated", {
 		"current_char_advance": advance_infos[current_char_index],
+		"y_offset": int(yoffset_value_edit.text)
 	})
 
 
@@ -374,14 +428,21 @@ func _on_next_char_button_pressed() -> void:
 
 func _on_base_value_edit_focus_exited() -> void:
 	var parsed_value = int(base_value_edit.text)
-	parsed_value = max(0, parsed_value)
 	parsed_value = min(int(char_height_edit.text), parsed_value)
 	
 	base_value_edit.text = str(parsed_value)
 	
 	emit_signal("form_field_updated", {"base_from_top": parsed_value})
 
+func _on_yoffset_value_edit_focus_exited() -> void:
+	var parsed_value = int(yoffset_value_edit.text)
+	parsed_value = max(0, parsed_value)
+	yoffset_value_edit.text = str(parsed_value)
+	
+	emit_signal("form_field_updated", {"y_offset": parsed_value})
 
+	_update_current_visible_char()
+	
 func _get_export_values():
 	return {
 		"font_name": font_name_edit.text,
@@ -392,6 +453,7 @@ func _get_export_values():
 		"char_list": char_list_edit.text,
 		"advance_infos": advance_infos.slice(0, char_list_edit.text.length()),
 		"file_extension": texture_file_extension,
+		"y_offset": int(yoffset_value_edit.text)
 	}
 
 

@@ -6,12 +6,14 @@ FONT_NAME,Font Name
 TEXTURE_NAME,Texture Name
 CHAR_DIMENSIONS,Character Dimensions
 BASE_FROM_TOP,Base From Top
+Y_OFFSET_VALUE,Crop from Top
 CHAR_LIST,Character List
 CHAR_WIDTH,Character Width
 EXPORT_FNT,Export .fnt as Text
 LETTER_X_ADVANCE,Letter X Advance
 CURRENT_LETTER,Current Letter
 FILE_IS_NOT_TEXTURE,Selected file is not a texture.
+FILE_IS_NOT_FNT,Selected file is not a .FNT.
 FILE_EXPORT_SUCCESS,File export is successful.
 FILE_EXPORT_ERROR,File export is failed.
 FILE_EXISTS,.fnt file exists. Overwrite to it?

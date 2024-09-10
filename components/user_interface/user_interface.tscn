@@ -264,7 +264,7 @@ margin_right = 265.0
 margin_bottom = 630.0
 rect_min_size = Vector2( 150, 52.5 )
 popup_exclusive = true
-window_title = "Open an Image File"
+window_title = "Open a File"
 resizable = true
 mode = 0
 access = 2
@@ -276,7 +276,7 @@ margin_right = 265.0
 margin_bottom = 630.0
 rect_min_size = Vector2( 150, 52.5 )
 popup_exclusive = true
-window_title = "Open a Fnt File"
+window_title = "Open a File"
 resizable = true
 mode = 0
 access = 2
@@ -307,7 +307,7 @@ rect_min_size = Vector2( 200, 0 )
 
 [node name="Items" type="VBoxContainer" parent="TextureInfoControl/Panel/Margin/Scroll"]
 margin_right = 200.0
-margin_bottom = 645.0
+margin_bottom = 697.0
 rect_min_size = Vector2( 200, 0 )
 __meta__ = {
 "_edit_use_anchors_": false
@@ -488,44 +488,84 @@ margin_bottom = 24.0
 rect_min_size = Vector2( 50, 0 )
 text = ">"
 
-[node name="BaseFromTopMargin" parent="TextureInfoControl/Panel/Margin/Scroll/Items" instance=ExtResource( 5 )]
+[node name="YOffsetLabel" type="Label" parent="TextureInfoControl/Panel/Margin/Scroll/Items"]
 margin_top = 434.0
 margin_right = 200.0
-margin_bottom = 434.0
+margin_bottom = 454.0
+custom_fonts/font = ExtResource( 3 )
+text = "Y_OFFSET_VALUE"
+
+[node name="YOffsetSettings" type="HBoxContainer" parent="TextureInfoControl/Panel/Margin/Scroll/Items"]
+margin_top = 458.0
+margin_right = 200.0
+margin_bottom = 482.0
+
+[node name="DecreaseButton" type="Button" parent="TextureInfoControl/Panel/Margin/Scroll/Items/YOffsetSettings"]
+margin_right = 50.0
+margin_bottom = 24.0
+rect_min_size = Vector2( 50, 0 )
+text = "<"
+
+[node name="BaseValue" type="LineEdit" parent="TextureInfoControl/Panel/Margin/Scroll/Items/YOffsetSettings"]
+margin_left = 54.0
+margin_right = 122.0
+margin_bottom = 24.0
+rect_min_size = Vector2( 68, 0 )
+text = "0"
+
+[node name="Pixels3" type="Label" parent="TextureInfoControl/Panel/Margin/Scroll/Items/YOffsetSettings"]
+margin_left = 126.0
+margin_top = 2.0
+margin_right = 145.0
+margin_bottom = 22.0
+custom_fonts/font = ExtResource( 3 )
+text = "px"
+
+[node name="IncreaseButton" type="Button" parent="TextureInfoControl/Panel/Margin/Scroll/Items/YOffsetSettings"]
+margin_left = 149.0
+margin_right = 199.0
+margin_bottom = 24.0
+rect_min_size = Vector2( 50, 0 )
+text = ">"
+
+[node name="BaseFromTopMargin" parent="TextureInfoControl/Panel/Margin/Scroll/Items" instance=ExtResource( 5 )]
+margin_top = 486.0
+margin_right = 200.0
+margin_bottom = 486.0
 
 [node name="CharacterListLabel" type="Label" parent="TextureInfoControl/Panel/Margin/Scroll/Items"]
-margin_top = 438.0
+margin_top = 490.0
 margin_right = 200.0
-margin_bottom = 458.0
+margin_bottom = 510.0
 custom_fonts/font = ExtResource( 3 )
 text = "CHAR_LIST"
 
 [node name="CharacterListEdit" type="TextEdit" parent="TextureInfoControl/Panel/Margin/Scroll/Items"]
-margin_top = 462.0
+margin_top = 514.0
 margin_right = 200.0
-margin_bottom = 538.0
+margin_bottom = 590.0
 rect_min_size = Vector2( 0, 76 )
 custom_fonts/font = SubResource( 2 )
 selecting_enabled = false
 wrap_enabled = true
 
 [node name="VMarginCharList" parent="TextureInfoControl/Panel/Margin/Scroll/Items" instance=ExtResource( 4 )]
-margin_top = 542.0
+margin_top = 594.0
 margin_right = 200.0
-margin_bottom = 557.0
+margin_bottom = 609.0
 
 [node name="ExportButton" type="Button" parent="TextureInfoControl/Panel/Margin/Scroll/Items"]
-margin_top = 561.0
+margin_top = 613.0
 margin_right = 200.0
-margin_bottom = 601.0
+margin_bottom = 653.0
 rect_min_size = Vector2( 0, 40 )
 custom_fonts/font = ExtResource( 3 )
 text = "EXPORT_FNT"
 
 [node name="ExportAsXMLButton" type="Button" parent="TextureInfoControl/Panel/Margin/Scroll/Items"]
-margin_top = 605.0
+margin_top = 657.0
 margin_right = 200.0
-margin_bottom = 645.0
+margin_bottom = 697.0
 rect_min_size = Vector2( 0, 40 )
 custom_fonts/font = ExtResource( 3 )
 text = "EXPORT_FNT_AS_XML"

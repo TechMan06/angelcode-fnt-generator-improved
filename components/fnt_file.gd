@@ -76,8 +76,8 @@ func add_values(values):
 	for i in range(char_count):
 		add_char(values.char_list[i],
 				(i % h_char_count) * values.char_dimensions.x,
-				(i / h_char_count) * values.char_dimensions.y,
-				values.char_dimensions.x, values.char_dimensions.y,
+				((i / h_char_count) * values.char_dimensions.y) + values.y_offset,
+				values.char_dimensions.x, values.char_dimensions.y - values.y_offset,
 				values.advance_infos[i])
 
 
